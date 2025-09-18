@@ -1,95 +1,212 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import '@/styles/product-gallery.css';
-import { Heart, Share2, Minus, Plus, Star, Shield, Truck, RotateCcw } from 'lucide-react';
-import Navigation from '@/components/Navigation';
-import WhatsAppButton from '@/components/WhatsAppButton';
-import Breadcrumbs from '@/components/Breadcrumbs';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Star, ShoppingCart, Heart, Minus, Plus, ShoppingBag, ChevronLeft, Share2, Truck, RotateCcw, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
+import Navigation from '@/components/Navigation';
+import WhatsAppButton from '@/components/WhatsAppButton';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import ProductCard from '@/components/ProductCard';
+import { getProductById, getFeaturedProducts } from '@/api/products';
 
-// Import product images
-import caftanImage from '@/assets/caftan-1.jpg';
-import takchitaImage from '@/assets/takchita-1.jpg';
-import jellabaImage from '@/assets/jellaba-1.jpg';
-import babouchesImage from '@/assets/babouches-1.jpg';
+// Extended Product interface to handle both string and object color formats
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  originalPrice?: number;
+  description: string;
+  category: string;
+  images: string[];
+  colors: string[];
+  sizes: string[];
+  isNew?: boolean;
+  rating?: number;
+  reviews?: number;
+  inStock: boolean;
+  features?: string[];
+}
 
-// Mock product data - in a real app, this would come from an API
-const mockProducts = [
-  {
-    id: '1',
-    name: 'Emerald Silk Caftan with Gold Embroidery',
-    price: 1200,
-    originalPrice: 1500,
-    images: [caftanImage, takchitaImage, jellabaImage, babouchesImage],
-    category: 'Caftans',
-    description: 'This exquisite emerald silk caftan features intricate gold embroidery handcrafted by master artisans in Fez. The flowing silhouette and luxurious fabric make it perfect for special occasions and celebrations.',
-    features: [
-      'Hand-embroidered with 24k gold thread',
-      'Premium silk fabric from Morocco',
-      'Traditional Fez craftsmanship',
-      'Flowing, comfortable fit',
-      'Dry clean only'
-    ],
-    sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-    colors: [
-      { name: 'Emerald', value: '#50C878' },
-      { name: 'Royal Blue', value: '#003366' },
-      { name: 'Gold', value: '#D4AF37' }
-    ],
-    isNew: true,
-    rating: 4.8,
-    reviews: 24
-  },
-  // Add more mock products as needed
+// Product type is now imported from the API module
+
+// Mock features for products
+const defaultFeatures = [
+  'Premium quality materials',
+  'Handcrafted by skilled artisans',
+  'Ethically sourced materials',
+  'Traditional Moroccan craftsmanship'
 ];
 
+// Helper function to get related products
+const fetchRelatedProducts = async (productId: string): Promise<Product[]> => {
+  try {
+    return await getFeaturedProducts(4); // Using featured products as related for now
+  } catch (error) {
+    console.error('Error fetching related products:', error);
+    return [];
+  }
+};
+
 const ProductDetails = () => {
+  // Router and Refs
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef({ x: 0, y: 0, time: 0 });
+  const touchMoveRef = useRef({ x: 0, y: 0 });
+  const scaleRef = useRef(1);
+
+  // State
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState('');
-  const [selectedColor, setSelectedColor] = useState('');
+  const [selectedColor, setSelectedColor] = useState<string>('');
   const [mainImage, setMainImage] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
-  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
-  const [product, setProduct] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [youMayAlsoLike, setYouMayAlsoLike] = useState<Product[]>([]);
 
+  // Fetch product data
   useEffect(() => {
-    // In a real app, you would fetch the product data from an API
-    const fetchProduct = async () => {
+    let isMounted = true;
+    
+    const fetchData = async () => {
+      if (!id) {
+        setError('No product ID provided');
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 500));
+        setIsLoading(true);
+        setError(null);
+
+        // Fetch product details
+        const productData = await getProductById(id);
         
-        const foundProduct = mockProducts.find((p: any) => p.id === id);
-        if (foundProduct) {
-          setProduct(foundProduct);
-          setSelectedSize(foundProduct.sizes?.[0] || '');
-          setSelectedColor(foundProduct.colors?.[0]?.value || '');
-        } else {
-          throw new Error('Product not found');
+        if (!isMounted) return;
+        
+        if (!productData) {
+          setError('Product not found');
+          return;
         }
-      } catch (err: any) {
-        setError(err.message);
-        toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: 'Failed to load product details. Please try again later.'
-        });
+
+        setProduct(productData);
+
+        // Set default selections
+        if (productData.sizes?.length) {
+          setSelectedSize(productData.sizes[0]);
+        }
+        
+        if (productData.colors?.length) {
+          setSelectedColor(productData.colors[0] || '');
+        }
+      } catch (err) {
+        console.error('Error fetching product:', err);
+        if (isMounted) {
+          setError('Failed to load product. Please try again later.');
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
-    fetchProduct();
+    fetchData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
-  if (loading) {
+  // Handle keyboard navigation
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (!product?.images) return;
+
+    switch (e.key) {
+      case 'ArrowLeft':
+        e.preventDefault();
+        setMainImage(prev => (prev > 0 ? prev - 1 : product.images.length - 1));
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        setMainImage(prev => (prev < product.images.length - 1 ? prev + 1 : 0));
+        break;
+      case 'Escape':
+        if (isFullscreen) {
+          document.exitFullscreen().catch(console.error);
+          setIsFullscreen(false);
+        }
+        break;
+      case 'f':
+      case 'F':
+        toggleFullscreen();
+        break;
+      default:
+        break;
+    }
+  }, [product?.images, isFullscreen]);
+
+  // Toggle fullscreen mode
+  const toggleFullscreen = useCallback(() => {
+    if (!galleryRef.current) return;
+
+    if (!document.fullscreenElement) {
+      galleryRef.current.requestFullscreen().then(() => {
+        setIsFullscreen(true);
+      }).catch(console.error);
+    } else {
+      document.exitFullscreen().then(() => {
+        setIsFullscreen(false);
+      }).catch(console.error);
+    }
+  }, []);
+
+  // Handle fullscreen change events
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  // Add keyboard event listeners
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
+
+  // Preload next and previous images
+  useEffect(() => {
+    if (!product?.images) return;
+
+    const preloadImages = [
+      product.images[(mainImage - 1 + product.images.length) % product.images.length],
+      product.images[(mainImage + 1) % product.images.length]
+    ];
+
+    preloadImages.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, [mainImage, product?.images]);
+
+  // Loading state
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -97,14 +214,26 @@ const ProductDetails = () => {
     );
   }
 
+  // Error or not found state
   if (error || !product) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
-        <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
-        <p className="text-muted-foreground mb-6">The product you're looking for doesn't exist or has been removed.</p>
-        <Button asChild>
-          <Link to="/shop">Continue Shopping</Link>
-        </Button>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center p-6 max-w-md">
+          <h2 className="text-2xl font-bold text-foreground mb-2">
+            {error === 'Product not found' ? 'Product Not Found' : 'Error Loading Product'}
+          </h2>
+          <p className="text-muted-foreground mb-4">
+            {error || 'The requested product could not be loaded.'}
+          </p>
+          <div className="flex gap-4 justify-center">
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
+            <Button asChild>
+              <Link to="/shop">Back to Shop</Link>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -116,55 +245,187 @@ const ProductDetails = () => {
   // Image zoom handlers
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isZoomed) return;
-    
+
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - left) / width) * 100;
     const y = ((e.clientY - top) / height) * 100;
-    setZoomPosition({ x, y });
+    // setZoomPosition({ x, y });
+  };
+
+  // Touch gesture handlers
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+      time: Date.now()
+    };
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      // Single touch - track movement for swipe
+      touchMoveRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY
+      };
+    } else if (e.touches.length === 2) {
+      // Two fingers - handle pinch to zoom
+      e.preventDefault();
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const dist = Math.hypot(
+        touch2.clientX - touch1.clientX,
+        touch2.clientY - touch1.clientY
+      );
+
+      if (scaleRef.current === 1) {
+        scaleRef.current = dist / 100;
+      } else {
+        const newScale = dist / 100;
+        if (newScale > 1) {
+          setIsZoomed(true);
+          scaleRef.current = newScale;
+        }
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    const { x: startX, y: startY, time } = touchStartRef.current;
+    const { x: endX, y: endY } = touchMoveRef.current;
+    const deltaX = endX - startX;
+    const deltaY = endY - startY;
+    const distance = Math.hypot(deltaX, deltaY);
+    const elapsed = Date.now() - time;
+
+    // Check if it's a swipe (fast enough and mostly horizontal)
+    if (distance > 30 && elapsed < 300 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX > 0) {
+        // Swipe right - previous image
+        setMainImage(prev => (prev > 0 ? prev - 1 : product.images.length - 1));
+      } else {
+        // Swipe left - next image
+        setMainImage(prev => (prev < product.images.length - 1 ? prev + 1 : 0));
+      }
+    }
+
+    // Reset zoom if pinched closed
+    if (scaleRef.current < 1.2) {
+      setIsZoomed(false);
+      scaleRef.current = 1;
+    }
+  };
+
+  const handleBuyNow = () => {
+    if (!product) return;
+
+    // In a real app, this would add to cart and redirect to checkout
+    const item = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images[0],
+      quantity,
+      size: selectedSize,
+      color: selectedColor
+    };
+
+    // Add to cart context
+    // Then navigate to checkout
+    navigate('/checkout');
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Breadcrumbs 
+        <Breadcrumbs
           items={[
             { label: 'Home', href: '/' },
             { label: 'Shop', href: '/shop' },
             { label: product.name, href: `#` }
-          ]} 
+          ]}
         />
-        
+
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
           {/* Product Images */}
           <div className="space-y-4">
-            <div 
-              className={`relative aspect-square overflow-hidden rounded-lg cursor-${isZoomed ? 'zoom-in' : 'zoom-out'}`}
-              onMouseEnter={() => setIsZoomed(true)}
-              onMouseLeave={() => setIsZoomed(false)}
+            <div
+              ref={galleryRef}
+              className={`relative aspect-square overflow-hidden rounded-lg cursor-${isZoomed ? 'zoom-out' : 'zoom-in'} ${
+                isFullscreen ? 'bg-black' : 'bg-background'
+              }`}
+              onMouseEnter={() => !isFullscreen && setIsZoomed(true)}
+              onMouseLeave={() => !isFullscreen && setIsZoomed(false)}
               onMouseMove={handleMouseMove}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
             >
-              <div 
+              <div
                 className="w-full h-full transition-transform duration-300"
                 style={{
-                  transform: isZoomed ? 'scale(1.5)' : 'scale(1)',
-                  transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                  transform: isZoomed ? `scale(${isFullscreen ? 2 : 1.5})` : 'scale(1)',
+                  transformOrigin: 'center',
                   backgroundImage: `url(${product.images[mainImage]})`,
-                  backgroundSize: 'cover',
+                  backgroundSize: isFullscreen ? 'contain' : 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
                   height: '100%',
-                  width: '100%'
+                  width: '100%',
+                  touchAction: 'none'
                 }}
               />
+
+              {/* Fullscreen toggle button */}
+              <button
+                onClick={toggleFullscreen}
+                className="absolute top-4 right-4 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors z-10"
+                aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+              >
+                {isFullscreen ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                  </svg>
+                )}
+              </button>
+
+              {/* Navigation arrows (visible in fullscreen) */}
+              {isFullscreen && (
+                <>
+                  <button
+                    onClick={() => setMainImage(prev => (prev > 0 ? prev - 1 : product.images.length - 1))}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors z-10"
+                    aria-label="Previous image"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="m15 18-6-6 6-6" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setMainImage(prev => (prev < product.images.length - 1 ? prev + 1 : 0))}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors z-10"
+                    aria-label="Next image"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="m9 18 6-6-6-6" />
+                    </svg>
+                  </button>
+                </>
+              )}
               {product.isNew && (
                 <Badge className="absolute top-4 left-4 bg-accent text-accent-foreground">
                   New
                 </Badge>
               )}
             </div>
-            
+
             {/* Thumbnails with Scroll */}
             <div className="relative">
               <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -173,9 +434,9 @@ const ProductDetails = () => {
                     key={index}
                     onClick={() => setMainImage(index)}
                     className={`flex-shrink-0 relative aspect-square w-16 overflow-hidden rounded-md border-2 transition-all ${
-                      mainImage === index 
-                        ? 'border-primary scale-105' 
-                        : 'border-transparent hover:border-border hover:scale-105'
+                      mainImage === index
+                        ? 'border-primary scale-105'
+                        : 'border-transparent hover:border-gray-300'
                     }`}
                   >
                     <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${img})` }} />
@@ -194,19 +455,21 @@ const ProductDetails = () => {
               <h1 className="text-3xl font-serif font-bold text-foreground mb-2">
                 {product.name}
               </h1>
-              
+
               <div className="flex items-center gap-4 mb-4">
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star 
-                      key={i}
-                      className={`h-4 w-4 ${i < Math.floor(product.rating) ? 'fill-moroccan-gold text-moroccan-gold' : 'text-muted-foreground'}`}
-                    />
-                  ))}
-                  <span className="text-sm text-muted-foreground ml-2">
-                    {product.rating} ({product.reviews} reviews)
-                  </span>
-                </div>
+                {product.rating !== undefined && product.reviews !== undefined && (
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-4 w-4 ${i < Math.floor(product.rating) ? 'fill-moroccan-gold text-moroccan-gold' : 'text-muted-foreground'}`}
+                      />
+                    ))}
+                    <span className="text-sm text-muted-foreground ml-2">
+                      {product.rating} ({product.reviews} reviews)
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-4">
@@ -232,19 +495,25 @@ const ProductDetails = () => {
 
             {/* Color Selection */}
             <div className="space-y-3">
-              <label className="text-sm font-medium text-foreground">
-                Color: {selectedColor && <span className="text-muted-foreground">{selectedColor}</span>}
-              </label>
-              <div className="flex gap-3">
-                {product.colors.map((color) => (
+              <div className="text-sm text-muted-foreground">
+                Color: {selectedColor && (
+                  <span className="text-muted-foreground ml-1 capitalize">{selectedColor}</span>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {product.colors.map((color, index) => (
                   <button
-                    key={color.name}
-                    onClick={() => setSelectedColor(color.name)}
-                    className={`w-10 h-10 rounded-full border-2 transition-all ${
-                      selectedColor === color.name ? 'border-primary scale-110' : 'border-border'
+                    key={index}
+                    type="button"
+                    onClick={() => setSelectedColor(color)}
+                    className={`h-10 w-10 rounded-full border-2 transition-all ${
+                      selectedColor === color 
+                        ? 'border-primary scale-110' 
+                        : 'border-transparent hover:border-gray-300'
                     }`}
-                    style={{ backgroundColor: color.value }}
-                    title={color.name}
+                    style={{ backgroundColor: color }}
+                    aria-label={`Color ${color}`}
+                    title={color}
                   />
                 ))}
               </div>
@@ -297,14 +566,21 @@ const ProductDetails = () => {
 
             {/* Actions */}
             <div className="space-y-3">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="w-full btn-moroccan"
                 disabled={!selectedSize || !selectedColor}
               >
                 Add to Cart - {product.price * quantity} MAD
               </Button>
-              
+              <Button
+                variant="outline"
+                className="w-full py-6 text-lg font-medium border-2 border-primary text-primary hover:bg-primary/10"
+                onClick={handleBuyNow}
+              >
+                <ShoppingBag className="mr-2 h-5 w-5" />
+                Buy Now
+              </Button>
               <div className="flex gap-3">
                 <Button variant="outline" size="lg" className="flex-1">
                   <Heart className="h-5 w-5 mr-2" />
@@ -345,11 +621,11 @@ const ProductDetails = () => {
               <TabsTrigger value="reviews">Reviews ({product.reviews})</TabsTrigger>
               <TabsTrigger value="care">Care Instructions</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="details" className="mt-6 space-y-4">
               <h3 className="font-serif text-xl font-semibold text-foreground">Product Features</h3>
               <ul className="space-y-2">
-                {product.features.map((feature, index) => (
+                {((product.features && product.features.length > 0) ? product.features : defaultFeatures).map((feature, index) => (
                   <li key={index} className="flex items-start gap-2 text-muted-foreground">
                     <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
                     {feature}
@@ -357,13 +633,13 @@ const ProductDetails = () => {
                 ))}
               </ul>
             </TabsContent>
-            
+
             <TabsContent value="reviews" className="mt-6">
               <div className="text-center py-12">
                 <p className="text-muted-foreground">Reviews feature coming soon</p>
               </div>
             </TabsContent>
-            
+
             <TabsContent value="care" className="mt-6 space-y-4">
               <h3 className="font-serif text-xl font-semibold text-foreground">Care Instructions</h3>
               <ul className="space-y-2 text-muted-foreground">
@@ -378,10 +654,50 @@ const ProductDetails = () => {
         </div>
 
         {/* Related Products */}
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold mb-8">You May Also Like</h2>
-          <p className="text-muted-foreground">Related products will be shown here.</p>
-        </div>
+        {relatedProducts.length > 0 && (
+          <section className="mt-16">
+            <h2 className="text-2xl font-serif font-bold mb-8">Related Products</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relatedProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  name={product.name}
+                  price={product.price}
+                  originalPrice={product.originalPrice}
+                  image={product.images[0]}
+                  category={product.category}
+                  isNew={product.isNew}
+                  colors={product.colors}
+                  sizes={product.sizes}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* You May Also Like */}
+        {youMayAlsoLike.length > 0 && (
+          <section className="mt-16">
+            <h2 className="text-2xl font-serif font-bold mb-8">You May Also Like</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {youMayAlsoLike.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  name={product.name}
+                  price={product.price}
+                  originalPrice={product.originalPrice}
+                  image={product.images[0]}
+                  category={product.category}
+                  isNew={product.isNew}
+                  colors={product.colors}
+                  sizes={product.sizes}
+                />
+              ))}
+            </div>
+          </section>
+        )}
       </main>
 
       <WhatsAppButton />
