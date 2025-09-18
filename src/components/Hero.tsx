@@ -14,9 +14,9 @@ const Hero = () => {
           {/* Content */}
           <div className="text-center lg:text-left">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-foreground mb-6 leading-tight">
-              Authentic
-              <span className="block text-primary">Moroccan</span>
-              Elegance
+              Mina Collection
+              <span className="block text-primary">Authentic</span>
+              Moroccan Elegance
             </h1>
             
             <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl leading-relaxed">

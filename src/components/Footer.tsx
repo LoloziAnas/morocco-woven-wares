@@ -37,7 +37,7 @@ const Footer = () => {
   const socialLinks = [
     { name: 'Facebook', icon: Facebook, href: '#', color: 'hover:text-blue-600' },
     { name: 'Instagram', icon: Instagram, href: '#', color: 'hover:text-pink-600' },
-    { name: 'Twitter', icon: Twitter, href: '#', color: 'hover:text-blue-400' },
+    { name: 'TikTok', icon: Twitter, href: '#', color: 'hover:text-black' },
   ];
 
   return (
@@ -49,7 +49,7 @@ const Footer = () => {
             {/* Brand Section */}
             <div className="lg:col-span-2">
               <Link to="/" className="text-2xl font-serif font-bold text-primary mb-4 block">
-                Marocaine
+                Mina
               </Link>
               <p className="text-deep-blue-foreground/80 mb-6 leading-relaxed">
                 Authentic Moroccan clothing crafted by master artisans. 
@@ -68,7 +68,7 @@ const Footer = () => {
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <Mail className="h-4 w-4 text-primary flex-shrink-0" />
-                  <span>hello@marocaine.com</span>
+                  <span>hello@mina.com</span>
                 </div>
               </div>
             </div>
@@ -148,7 +148,7 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             {/* Copyright */}
             <div className="text-sm text-deep-blue-foreground/70">
-              © {currentYear} Marocaine. All rights reserved.
+              © {currentYear} Mina. All rights reserved.
             </div>
 
             {/* Social Links */}

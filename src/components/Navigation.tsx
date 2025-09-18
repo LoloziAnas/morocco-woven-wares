@@ -25,7 +25,7 @@ const Navigation = () => {
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link to="/" className="text-2xl font-serif font-bold text-primary">
-              Marocaine
+              Mina
             </Link>
           </div>
 
