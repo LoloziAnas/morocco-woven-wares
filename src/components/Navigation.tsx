@@ -28,9 +28,8 @@ const Navigation = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link to="/" className="flex items-center space-x-2">
-              <img src="/logo.svg" alt="Marocaine" className="h-8 w-auto" />
-              <span className="sr-only">Marocaine</span>
+            <Link to="/" className="text-3xl font-serif font-bold text-primary">
+              Mina
             </Link>
           </div>
 

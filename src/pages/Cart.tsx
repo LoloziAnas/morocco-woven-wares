@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
@@ -8,50 +7,31 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-
-// Import product images
-import caftanImage from '@/assets/caftan-1.jpg';
-import takchitaImage from '@/assets/takchita-1.jpg';
+import { useCart } from '@/contexts/CartContext';
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: '1',
-      name: 'Emerald Silk Caftan with Gold Embroidery',
-      price: 1200,
-      quantity: 1,
-      size: 'M',
-      color: 'Emerald',
-      image: caftanImage
-    },
-    {
-      id: '2',
-      name: 'Royal Blue Takchita with Silver Threading',
-      price: 2800,
-      quantity: 2,
-      size: 'L',
-      color: 'Royal Blue',
-      image: takchitaImage
+  const { 
+    cartItems, 
+    updateQuantity, 
+    removeFromCart, 
+    clearCart, 
+    itemCount, 
+    totalPrice 
+  } = useCart();
+
+  const handleQuantityChange = (id: string, change: number) => {
+    const item = cartItems.find(item => item.id === id);
+    if (item) {
+      updateQuantity(id, item.quantity + change);
     }
-  ]);
-
-  const updateQuantity = (id: string, change: number) => {
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + change) }
-          : item
-      )
-    );
   };
 
-  const removeItem = (id: string) => {
-    setCartItems(items => items.filter(item => item.id !== id));
+  const handleRemoveItem = (id: string) => {
+    removeFromCart(id);
   };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = subtotal > 500 ? 0 : 50;
-  const total = subtotal + shipping;
+  const shipping = totalPrice > 0 ? 100 : 0; 
+  const total = totalPrice + shipping;
 
   if (cartItems.length === 0) {
     return (
@@ -129,22 +109,20 @@ const Cart = () => {
                           <Button
                             variant="outline"
                             size="icon"
-                            className="h-8 w-8"
-                            onClick={() => updateQuantity(item.id, -1)}
+                            className="h-8 w-8 rounded-full"
+                            onClick={() => handleQuantityChange(item.id, -1)}
                             disabled={item.quantity <= 1}
                           >
-                            <Minus className="h-3 w-3" />
+                            <Minus className="h-4 w-4" />
                           </Button>
-                          <span className="w-8 text-center text-sm font-medium">
-                            {item.quantity}
-                          </span>
+                          <span className="w-8 text-center">{item.quantity}</span>
                           <Button
                             variant="outline"
                             size="icon"
-                            className="h-8 w-8"
-                            onClick={() => updateQuantity(item.id, 1)}
+                            className="h-8 w-8 rounded-full"
+                            onClick={() => handleQuantityChange(item.id, 1)}
                           >
-                            <Plus className="h-3 w-3" />
+                            <Plus className="h-4 w-4" />
                           </Button>
                         </div>
                         
@@ -155,8 +133,8 @@ const Cart = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive"
-                            onClick={() => removeItem(item.id)}
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                            onClick={() => handleRemoveItem(item.id)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -178,9 +156,9 @@ const Cart = () => {
                 </h2>
                 
                 <div className="space-y-4">
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>Subtotal</span>
-                    <span>{subtotal} MAD</span>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span>{totalPrice} MAD</span>
                   </div>
                   
                   <div className="flex justify-between text-muted-foreground">

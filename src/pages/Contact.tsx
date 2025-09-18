@@ -69,7 +69,7 @@ const Contact = () => {
     {
       icon: Mail,
       title: 'Email Us',
-      details: ['hello@marocaine.com', 'support@marocaine.com'],
+      details: ['hello@mina.com', 'support@mina.com'],
       color: 'text-green-500'
     },
     {

@@ -2,7 +2,7 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { Button } from '@/components/ui/button';
-import { Heart, Award, Users, Globe } from 'lucide-react';
+import { Heart, Award, Users, Globe, Sparkles, Leaf, Handshake } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const About = () => {
@@ -30,30 +30,33 @@ const About = () => {
   ];
 
   const timeline = [
+    { year: '2008', title: 'The Beginning', description: 'Founded in Marrakech to preserve traditional Moroccan craftsmanship.' },
+    { year: '2012', title: 'Artisan Network', description: 'Established partnerships with master artisans across Morocco.' },
+    { year: '2016', title: 'Global Expansion', description: 'Launched international shipping worldwide.' },
+    { year: '2020', title: 'Digital Innovation', description: 'Embraced e-commerce while maintaining traditional values.' },
+    { year: '2024', title: 'Sustainable Future', description: 'Leading initiatives in sustainable fashion.' }
+  ];
+
+  const teamMembers = [
     {
-      year: '2008',
-      title: 'The Beginning',
-      description: 'Founded in the heart of Marrakech with a vision to preserve traditional Moroccan craftsmanship.'
+      name: 'Fatima Zahra',
+      role: 'Founder & Creative Director',
+      bio: '15+ years in traditional Moroccan textiles, leading our creative vision.'
     },
     {
-      year: '2012',
-      title: 'Master Artisan Network',
-      description: 'Established partnerships with over 20 master artisans across Morocco.'
+      name: 'Karim Alami',
+      role: 'Master Artisan',
+      bio: 'Third-generation craftsman specializing in traditional embroidery.'
     },
     {
-      year: '2016',
-      title: 'Global Expansion',
-      description: 'Launched international shipping, bringing authentic Moroccan fashion to the world.'
+      name: 'Amina Benjelloun',
+      role: 'Sustainability Officer',
+      bio: 'Ensuring our practices respect people and the environment.'
     },
     {
-      year: '2020',
-      title: 'Digital Innovation',
-      description: 'Embraced e-commerce while maintaining our commitment to traditional craftsmanship.'
-    },
-    {
-      year: '2024',
-      title: 'Sustainable Future',
-      description: 'Leading initiatives in sustainable fashion and cultural preservation.'
+      name: 'Youssef El Mansouri',
+      role: 'Customer Experience',
+      bio: 'Dedicated to exceptional service for our global community.'
     }
   ];
 
@@ -61,81 +64,103 @@ const About = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      <main>
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
-        <section className="py-16 lg:py-24 hero-gradient">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-foreground mb-6">
-                Our Story
-              </h1>
-              <p className="text-xl text-muted-foreground leading-relaxed">
-                Marocaine was born from a deep love for Moroccan culture and a commitment 
-                to preserving the ancient art of traditional clothing craftsmanship. 
-                Every stitch tells a story, every pattern carries history.
-              </p>
-            </div>
+        <section className="mb-16 text-center">
+          <h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-6">Our Story</h1>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-12">
+            Preserving Moroccan heritage through authentic craftsmanship and sustainable fashion
+          </p>
+          <div className="max-w-4xl mx-auto">
+            <p className="text-lg text-muted-foreground leading-relaxed mb-12">
+              Mina was born from a deep love for Moroccan culture and a commitment to preserving the ancient art of traditional clothing craftsmanship. Every stitch tells a story, every pattern carries history.
+            </p>
           </div>
         </section>
 
-        {/* Mission Statement */}
-        <section className="py-16 lg:py-20 bg-background">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <h2 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-6">
-                  Preserving Tradition, Embracing Modernity
-                </h2>
-                <p className="text-muted-foreground mb-6 leading-relaxed">
-                  Our mission is to bridge the gap between Morocco's rich textile heritage 
-                  and contemporary fashion needs. We work directly with master artisans 
-                  who have spent decades perfecting their craft, ensuring that every piece 
-                  we offer is authentic, high-quality, and culturally respectful.
-                </p>
-                <p className="text-muted-foreground mb-8 leading-relaxed">
-                  From the bustling souks of Marrakech to the coastal workshops of Casablanca, 
-                  we source our materials and partner with craftspeople who share our vision 
-                  of keeping Moroccan fashion traditions alive for future generations.
-                </p>
-                <Button asChild size="lg" className="btn-moroccan">
-                  <Link to="/shop">
-                    Explore Our Collection
-                  </Link>
-                </Button>
+        {/* Mission Section */}
+        <section className="mb-20">
+          <div className="bg-primary/5 p-8 rounded-2xl">
+            <div className="max-w-4xl mx-auto text-center">
+              <div className="flex justify-center mb-6">
+                <div className="p-3 bg-primary/10 rounded-full">
+                  <Sparkles className="h-8 w-8 text-primary" />
+                </div>
               </div>
-              <div className="relative">
-                <div className="aspect-square bg-gradient-sand rounded-2xl shadow-elegant p-8 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-4xl font-serif font-bold text-primary-foreground mb-2">15+</div>
-                    <div className="text-primary-foreground/90 text-sm uppercase tracking-wide mb-4">Years of Excellence</div>
-                    <div className="text-3xl font-serif font-bold text-primary-foreground mb-2">50+</div>
-                    <div className="text-primary-foreground/90 text-sm uppercase tracking-wide mb-4">Master Artisans</div>
-                    <div className="text-3xl font-serif font-bold text-primary-foreground mb-2">500+</div>
-                    <div className="text-primary-foreground/90 text-sm uppercase tracking-wide">Unique Pieces</div>
+              <h2 className="text-3xl font-serif font-semibold text-foreground mb-6">Our Mission</h2>
+              <p className="text-lg text-muted-foreground mb-8">
+                To celebrate and preserve Moroccan craftsmanship by creating authentic, high-quality traditional clothing while supporting local artisans and promoting sustainable practices.
+              </p>
+              <div className="grid md:grid-cols-3 gap-6 mt-10">
+                <div className="bg-background p-6 rounded-xl">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Leaf className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="font-medium">Sustainability</h3>
                   </div>
+                  <p className="text-sm text-muted-foreground">Eco-friendly materials and processes that respect our planet.</p>
+                </div>
+                <div className="bg-background p-6 rounded-xl">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Handshake className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="font-medium">Fair Trade</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Fair wages and good working conditions for all artisans.</p>
+                </div>
+                <div className="bg-background p-6 rounded-xl">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <Award className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="font-medium">Quality</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Handcrafted with traditional techniques and attention to detail.</p>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Values */}
-        <section className="py-16 lg:py-20 bg-muted/30">
+        {/* Team Section */}
+        <section className="mb-20">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-serif font-semibold text-foreground mb-4">Meet Our Team</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              A passionate group dedicated to preserving Moroccan craftsmanship
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {teamMembers.map((member, index) => (
+              <div key={index} className="group">
+                <div className="aspect-square overflow-hidden rounded-xl mb-4 bg-gray-100 flex items-center justify-center text-gray-400">
+                  <Users className="h-12 w-12" />
+                </div>
+                <h3 className="text-xl font-medium text-foreground">{member.name}</h3>
+                <p className="text-primary mb-2">{member.role}</p>
+                <p className="text-sm text-muted-foreground">{member.bio}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Values Section */}
+        <section className="py-16 lg:py-20 bg-muted/30 mb-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-4">
-                Our Values
-              </h2>
+              <h2 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-4">Our Values</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                These principles guide everything we do, from sourcing materials 
-                to crafting each piece with care and respect.
+                Guiding principles that shape our work and relationships
               </p>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               {values.map((value, index) => (
                 <div key={index} className="text-center group">
-                  <div className="bg-card card-elegant p-6 rounded-2xl h-full flex flex-col items-center">
+                  <div className="bg-card p-6 rounded-2xl h-full flex flex-col items-center">
                     <div className="mb-4 p-3 bg-primary/10 rounded-full group-hover:bg-primary/20 transition-colors duration-300">
                       <value.icon className="h-8 w-8 text-primary" />
                     </div>
@@ -152,15 +177,13 @@ const About = () => {
           </div>
         </section>
 
-        {/* Timeline */}
-        <section className="py-16 lg:py-20 bg-background">
+        {/* Timeline Section */}
+        <section className="py-16 lg:py-20 bg-background mb-20">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-4">
-                Our Journey
-              </h2>
+              <h2 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-4">Our Journey</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                From humble beginnings to becoming a trusted name in authentic Moroccan fashion.
+                Milestones in our story of preserving Moroccan craftsmanship
               </p>
             </div>
 
@@ -192,25 +215,20 @@ const About = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-16 bg-gradient-sand">
+        <section className="py-16 bg-gradient-to-r from-amber-50 to-amber-100">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-primary-foreground mb-4">
+            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-amber-900 mb-4">
               Join Our Story
             </h2>
-            <p className="text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
-              Be part of preserving Moroccan heritage while wearing authentic, 
-              handcrafted pieces that celebrate centuries of artisanal excellence.
+            <p className="text-amber-800/90 mb-8 max-w-2xl mx-auto">
+              Be part of preserving Moroccan heritage with authentic, handcrafted pieces that celebrate centuries of artisanal excellence.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90">
-                <Link to="/shop">
-                  Shop Now
-                </Link>
+              <Button asChild size="lg" className="bg-amber-900 text-amber-50 hover:bg-amber-900/90">
+                <Link to="/shop">Shop Now</Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10">
-                <Link to="/contact">
-                  Get in Touch
-                </Link>
+              <Button asChild variant="outline" size="lg" className="border-amber-900 text-amber-900 hover:bg-amber-900/10">
+                <Link to="/contact">Get in Touch</Link>
               </Button>
             </div>
           </div>
