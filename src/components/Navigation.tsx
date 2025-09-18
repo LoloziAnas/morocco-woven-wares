@@ -1,12 +1,16 @@
 import { useState } from 'react';
-import { Menu, X, ShoppingBag, Heart, User, Search } from 'lucide-react';
+import { Menu, X, ShoppingBag, Search, User, Heart } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Link, useLocation } from 'react-router-dom';
+import { useCart } from '@/contexts/CartContext';
+import { useFavorites } from '@/contexts/FavoritesContext';
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { itemCount: cartCount } = useCart();
+  const { favoritesCount } = useFavorites();
 
   const navItems = [
     { name: 'Home', href: '/' },
@@ -47,24 +51,45 @@ const Navigation = () => {
           </div>
 
           {/* Desktop Actions */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" size="icon">
-              <Search className="h-5 w-5" />
+          <div className="hidden md:flex items-center space-x-1">
+            <Button asChild variant="ghost" size="icon" className="relative">
+              <Link to="/search">
+                <Search className="h-5 w-5" />
+              </Link>
             </Button>
-            <Button variant="ghost" size="icon">
-              <Heart className="h-5 w-5" />
+            
+            <Button asChild variant="ghost" size="icon" className="relative">
+              <Link to="/favorites" className="relative">
+                {favoritesCount > 0 && (
+                  <Badge 
+                    variant="secondary" 
+                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary text-primary-foreground"
+                  >
+                    {favoritesCount}
+                  </Badge>
+                )}
+                <Heart className="h-5 w-5" />
+              </Link>
             </Button>
-            <Button variant="ghost" size="icon" className="relative">
-              <ShoppingBag className="h-5 w-5" />
-              <Badge 
-                variant="secondary" 
-                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary text-primary-foreground"
-              >
-                0
-              </Badge>
+            
+            <Button asChild variant="ghost" size="icon" className="relative">
+              <Link to="/cart" className="relative">
+                {cartCount > 0 && (
+                  <Badge 
+                    variant="secondary" 
+                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary text-primary-foreground"
+                  >
+                    {cartCount}
+                  </Badge>
+                )}
+                <ShoppingBag className="h-5 w-5" />
+              </Link>
             </Button>
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
+            
+            <Button asChild variant="ghost" size="icon">
+              <Link to="/account">
+                <User className="h-5 w-5" />
+              </Link>
             </Button>
           </div>
 
@@ -102,17 +127,31 @@ const Navigation = () => {
                 <Button variant="ghost" size="icon">
                   <Search className="h-5 w-5" />
                 </Button>
-                <Button variant="ghost" size="icon">
-                  <Heart className="h-5 w-5" />
+                <Button asChild variant="ghost" size="icon" className="relative">
+                  <Link to="/favorites">
+                    <Heart className="h-5 w-5" />
+                    {favoritesCount > 0 && (
+                      <Badge 
+                        variant="secondary" 
+                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary text-primary-foreground"
+                      >
+                        {favoritesCount}
+                      </Badge>
+                    )}
+                  </Link>
                 </Button>
-                <Button variant="ghost" size="icon" className="relative">
-                  <ShoppingBag className="h-5 w-5" />
-                  <Badge 
-                    variant="secondary" 
-                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary text-primary-foreground"
-                  >
-                    0
-                  </Badge>
+                <Button asChild variant="ghost" size="icon" className="relative">
+                  <Link to="/cart">
+                    <ShoppingBag className="h-5 w-5" />
+                    {cartCount > 0 && (
+                      <Badge 
+                        variant="secondary" 
+                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary text-primary-foreground"
+                      >
+                        {cartCount}
+                      </Badge>
+                    )}
+                  </Link>
                 </Button>
                 <Button variant="ghost" size="icon">
                   <User className="h-5 w-5" />

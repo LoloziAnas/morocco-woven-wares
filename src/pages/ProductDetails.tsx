@@ -1,14 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Heart, Share2, Minus, Plus, Star, Shield, Truck, RotateCcw } from 'lucide-react';
 import Navigation from '@/components/Navigation';
-import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import Breadcrumbs from '@/components/Breadcrumbs';
-import ProductCard from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from '@/components/ui/use-toast';
 
 // Import product images
 import caftanImage from '@/assets/caftan-1.jpg';
@@ -16,14 +16,9 @@ import takchitaImage from '@/assets/takchita-1.jpg';
 import jellabaImage from '@/assets/jellaba-1.jpg';
 import babouchesImage from '@/assets/babouches-1.jpg';
 
-const ProductDetails = () => {
-  const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState('');
-  const [selectedColor, setSelectedColor] = useState('');
-  const [mainImage, setMainImage] = useState(0);
-
-  // Mock product data
-  const product = {
+// Mock product data - in a real app, this would come from an API
+const mockProducts = [
+  {
     id: '1',
     name: 'Emerald Silk Caftan with Gold Embroidery',
     price: 1200,
@@ -47,26 +42,69 @@ const ProductDetails = () => {
     isNew: true,
     rating: 4.8,
     reviews: 24
-  };
+  },
+  // Add more mock products as needed
+];
 
-  const relatedProducts = [
-    {
-      id: '2',
-      name: 'Royal Blue Takchita',
-      price: 2800,
-      image: takchitaImage,
-      category: 'Takchitas',
-      colors: ['#003366', '#C0C0C0']
-    },
-    {
-      id: '3',
-      name: 'Traditional Jellaba',
-      price: 450,
-      image: jellabaImage,
-      category: 'Jellabas',
-      colors: ['#F5F1EB', '#D4B08A']
-    }
-  ];
+const ProductDetails = () => {
+  const { id } = useParams<{ id: string }>();
+  const [quantity, setQuantity] = useState(1);
+  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
+  const [mainImage, setMainImage] = useState(0);
+  const [product, setProduct] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // In a real app, you would fetch the product data from an API
+    const fetchProduct = async () => {
+      try {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const foundProduct = mockProducts.find((p: any) => p.id === id);
+        if (foundProduct) {
+          setProduct(foundProduct);
+          setSelectedSize(foundProduct.sizes?.[0] || '');
+          setSelectedColor(foundProduct.colors?.[0]?.value || '');
+        } else {
+          throw new Error('Product not found');
+        }
+      } catch (err: any) {
+        setError(err.message);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to load product details. Please try again later.'
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
+        <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
+        <p className="text-muted-foreground mb-6">The product you're looking for doesn't exist or has been removed.</p>
+        <Button asChild>
+          <Link to="/shop">Continue Shopping</Link>
+        </Button>
+      </div>
+    );
+  }
 
   const updateQuantity = (change: number) => {
     setQuantity(Math.max(1, quantity + change));
@@ -77,14 +115,15 @@ const ProductDetails = () => {
       <Navigation />
       
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Breadcrumbs items={[
-          { label: 'Home', href: '/' },
-          { label: 'Shop', href: '/shop' },
-          { label: product.category, href: `/shop?category=${product.category.toLowerCase()}` },
-          { label: product.name }
-        ]} />
-
-        <div className="grid lg:grid-cols-2 gap-12">
+        <Breadcrumbs 
+          items={[
+            { label: 'Home', href: '/' },
+            { label: 'Shop', href: '/shop' },
+            { label: product.name, href: `#` }
+          ]} 
+        />
+        
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
           {/* Product Images */}
           <div className="space-y-4">
             <div className="relative aspect-square overflow-hidden rounded-lg">
@@ -310,16 +349,11 @@ const ProductDetails = () => {
 
         {/* Related Products */}
         <div className="mt-16">
-          <h2 className="text-2xl font-serif font-bold text-foreground mb-8">You Might Also Like</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {relatedProducts.map((relatedProduct) => (
-              <ProductCard key={relatedProduct.id} {...relatedProduct} />
-            ))}
-          </div>
+          <h2 className="text-2xl font-bold mb-8">You May Also Like</h2>
+          <p className="text-muted-foreground">Related products will be shown here.</p>
         </div>
       </main>
 
-      <Footer />
       <WhatsAppButton />
     </div>
   );
