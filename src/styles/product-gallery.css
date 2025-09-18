@@ -1,0 +1,68 @@
+/* Product Gallery Styles */
+.product-gallery {
+  position: relative;
+}
+
+.gallery-main-image {
+  transition: transform 0.3s ease-out;
+  will-change: transform;
+}
+
+.gallery-thumbnails {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.gallery-thumbnails::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+.thumbnail-button {
+  flex: 0 0 auto;
+  position: relative;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.thumbnail-button.active {
+  border-color: hsl(var(--primary));
+  transform: scale(1.05);
+}
+
+.thumbnail-button:hover:not(.active) {
+  border-color: hsl(var(--border));
+  transform: scale(1.05);
+}
+
+.thumbnail-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.thumbnail-button.active .thumbnail-overlay {
+  background-color: rgba(59, 130, 246, 0.2);
+}
+
+/* Zoom cursor */
+.cursor-zoom-in {
+  cursor: zoom-in;
+}
+
+.cursor-zoom-out {
+  cursor: zoom-out;
+}
+
+/* Smooth transitions */
+.transition-transform {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}

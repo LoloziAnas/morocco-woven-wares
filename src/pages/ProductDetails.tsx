@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import '@/styles/product-gallery.css';
 import { Heart, Share2, Minus, Plus, Star, Shield, Truck, RotateCcw } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import WhatsAppButton from '@/components/WhatsAppButton';
@@ -52,6 +53,8 @@ const ProductDetails = () => {
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [mainImage, setMainImage] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -110,6 +113,16 @@ const ProductDetails = () => {
     setQuantity(Math.max(1, quantity + change));
   };
 
+  // Image zoom handlers
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isZoomed) return;
+    
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setZoomPosition({ x, y });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -126,11 +139,24 @@ const ProductDetails = () => {
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
           {/* Product Images */}
           <div className="space-y-4">
-            <div className="relative aspect-square overflow-hidden rounded-lg">
-              <img
-                src={product.images[mainImage]}
-                alt={product.name}
-                className="w-full h-full object-cover"
+            <div 
+              className={`relative aspect-square overflow-hidden rounded-lg cursor-${isZoomed ? 'zoom-in' : 'zoom-out'}`}
+              onMouseEnter={() => setIsZoomed(true)}
+              onMouseLeave={() => setIsZoomed(false)}
+              onMouseMove={handleMouseMove}
+            >
+              <div 
+                className="w-full h-full transition-transform duration-300"
+                style={{
+                  transform: isZoomed ? 'scale(1.5)' : 'scale(1)',
+                  transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                  backgroundImage: `url(${product.images[mainImage]})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  height: '100%',
+                  width: '100%'
+                }}
               />
               {product.isNew && (
                 <Badge className="absolute top-4 left-4 bg-accent text-accent-foreground">
@@ -139,22 +165,26 @@ const ProductDetails = () => {
               )}
             </div>
             
-            <div className="flex gap-4 overflow-x-auto">
-              {product.images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setMainImage(index)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border-2 transition-colors ${
-                    mainImage === index ? 'border-primary' : 'border-border'
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${product.name} view ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
+            {/* Thumbnails with Scroll */}
+            <div className="relative">
+              <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
+                {product.images.map((img: string, index: number) => (
+                  <button
+                    key={index}
+                    onClick={() => setMainImage(index)}
+                    className={`flex-shrink-0 relative aspect-square w-16 overflow-hidden rounded-md border-2 transition-all ${
+                      mainImage === index 
+                        ? 'border-primary scale-105' 
+                        : 'border-transparent hover:border-border hover:scale-105'
+                    }`}
+                  >
+                    <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${img})` }} />
+                    {mainImage === index && (
+                      <div className="absolute inset-0 bg-primary/20" />
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
