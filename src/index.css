@@ -2,41 +2,64 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* Moroccan E-commerce Design System */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Moroccan Color Palette */
+    --background: 40 15% 97%;
+    --foreground: 25 25% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 25 25% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 25 25% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Moroccan Sand & Gold Primary */
+    --primary: 43 74% 49%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Warm Beige Secondary */
+    --secondary: 40 25% 89%;
+    --secondary-foreground: 25 25% 15%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Muted Sand Tones */
+    --muted: 40 15% 92%;
+    --muted-foreground: 25 15% 45%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Emerald Accent */
+    --accent: 142 52% 55%;
+    --accent-foreground: 0 0% 100%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Deep Blue */
+    --deep-blue: 210 100% 20%;
+    --deep-blue-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 40 15% 85%;
+    --input: 40 15% 90%;
+    --ring: 43 74% 49%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Moroccan Gradients */
+    --gradient-sand: linear-gradient(135deg, hsl(43 74% 49%), hsl(40 60% 65%));
+    --gradient-emerald: linear-gradient(135deg, hsl(142 52% 55%), hsl(160 45% 45%));
+    --gradient-deep: linear-gradient(135deg, hsl(210 100% 20%), hsl(220 80% 25%));
+    --gradient-warm: linear-gradient(180deg, hsl(40 25% 89%), hsl(40 15% 97%));
+
+    /* Shadows */
+    --shadow-elegant: 0 10px 40px -10px hsl(25 25% 15% / 0.1);
+    --shadow-moroccan: 0 8px 32px -8px hsl(43 74% 49% / 0.3);
+    
+    /* Typography */
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Inter', sans-serif;
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +123,65 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+  }
+}
+
+@layer components {
+  /* Moroccan Pattern Background */
+  .moroccan-pattern {
+    background-image: radial-gradient(circle at 1px 1px, hsl(43 74% 49% / 0.1) 1px, transparent 0);
+    background-size: 20px 20px;
+  }
+
+  /* Hero Gradient Background */
+  .hero-gradient {
+    background: var(--gradient-warm);
+  }
+
+  /* Elegant Card */
+  .card-elegant {
+    box-shadow: var(--shadow-elegant);
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* Moroccan Button Styles */
+  .btn-moroccan {
+    background: var(--gradient-sand);
+    box-shadow: var(--shadow-moroccan);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .btn-moroccan:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 48px -12px hsl(43 74% 49% / 0.4);
+  }
+
+  /* Product Card Hover Effect */
+  .product-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-elegant);
+  }
+
+  /* WhatsApp Button */
+  .whatsapp-btn {
+    background: #25D366;
+    color: white;
+    border-radius: 50px;
+    box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .whatsapp-btn:hover {
+    background: #128C7E;
+    transform: scale(1.05);
   }
 }
